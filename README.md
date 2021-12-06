@@ -22,3 +22,15 @@ doctl auth init
 ```
 doctl kubernetes cluster create k8s-challenge --version 1.21.5-do.0 --count 3 --size s-4vcpu-8gb --region fra1
 ```
+- Get the Kubernetes cluster name and kubeconf
+```
+doctl kubernetes cluster list
+doctl kubernetes cluster kubeconfig show <CLUSTERNAME>
+doctl kubernetes cluster kubeconfig save <CLUSTERNAME>
+```
+- Delete the Kubernetes cluster and kubeconf
+```
+doctl kubernetes cluster list
+doctl kubernetes cluster kubeconfig rm <CLUSTERNAME>
+doctl kubernetes cluster rm <CLUSTERNAME>
+```
