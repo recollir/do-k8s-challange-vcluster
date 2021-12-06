@@ -13,7 +13,7 @@ From the [DigitalOcean Kubernetes Challange](https://www.digitalocean.com/commun
 brew install doctl
 ```
 - Create API token  
-Go to [DO API tokens](https://cloud.digitalocean.com/account/api/tokens\)
+Go to [DO API tokens](https://cloud.digitalocean.com/account/api/tokens)
 - Authenticate doctl
 ```
 doctl auth init
