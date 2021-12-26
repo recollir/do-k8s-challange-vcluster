@@ -6,13 +6,14 @@ From the [DigitalOcean Kubernetes Challange](https://www.digitalocean.com/commun
 > Install [vcluster](https://www.vcluster.com/) to test upgrades (eg. 1.20 to 1.21 DOKS version) of your cluster. With a virtual cluster, you can create a new Kubernetes cluster inside your existing DOKS cluster, test the application in this new vcluster, and then upgrade your original cluster if everything works well with the new version. Blogpost: [High-Velocity Engineering with Virtual Kubernetes Clusters](https://loft-sh.medium.com/high-velocity-engineering-with-virtual-kubernetes-clusters-7df929ac6d0a)
 
 
-## Preparations
+## Preparations - Create a Kubernetes cluster using [DOKS (DigitalOcean managed Kubernetes Service)](https://www.digitalocean.com/products/kubernetes/)
 
-- Install doctl
+- Install doctl and kubectl
 ```
 brew install doctl
+brew install kubectl
 ```
-- Create API token  
+- Create an API token (to be used in the next step)  
 Go to [DO API tokens](https://cloud.digitalocean.com/account/api/tokens)
 - Authenticate doctl
 ```
@@ -28,9 +29,19 @@ doctl kubernetes cluster list
 doctl kubernetes cluster kubeconfig show <CLUSTERNAME>
 doctl kubernetes cluster kubeconfig save <CLUSTERNAME>
 ```
+- Check access to the Kubernetes cluster
+```
+
+```
 - Delete the Kubernetes cluster and kubeconf
 ```
 doctl kubernetes cluster list
 doctl kubernetes cluster kubeconfig rm <CLUSTERNAME>
 doctl kubernetes cluster rm <CLUSTERNAME>
 ```
+
+## Install [vcluster](https://www.vcluster.com)
+
+Based on the [_getting started_ full guide](https://www.vcluster.com/docs/getting-started/setup).  
+**Requirement:** access to running Kubernetes cluster
+- Install the vcluster cli
