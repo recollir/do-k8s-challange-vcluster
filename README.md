@@ -32,7 +32,7 @@ doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
 ```
 - Check access to the Kubernetes cluster
 ```
-
+kubectl get nodes
 ```
 - Delete the Kubernetes cluster and kubeconf
 ```
