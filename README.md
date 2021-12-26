@@ -1,7 +1,7 @@
 # do-k8s-challange-vcluster
 DigitalOcean Kubernetes Challenge - Deploy a virtual cluster solution
 
-From the [DigitalOcean Kubernetes Challange](https://www.digitalocean.com/community/pages/kubernetes-challenge) homepage:
+From the [DigitalOcean Kubernetes Challenge](https://www.digitalocean.com/community/pages/kubernetes-challenge) homepage:
 
 > Install [vcluster](https://www.vcluster.com/) to test upgrades (eg. 1.20 to 1.21 DOKS version) of your cluster. With a virtual cluster, you can create a new Kubernetes cluster inside your existing DOKS cluster, test the application in this new vcluster, and then upgrade your original cluster if everything works well with the new version. Blogpost: [High-Velocity Engineering with Virtual Kubernetes Clusters](https://loft-sh.medium.com/high-velocity-engineering-with-virtual-kubernetes-clusters-7df929ac6d0a)
 
@@ -21,13 +21,14 @@ doctl auth init
 ```
 - Create Kubernetes cluster
 ```
-doctl kubernetes cluster create k8s-challenge --version 1.21.5-do.0 --count 3 --size s-4vcpu-8gb --region fra1
+CLUSTER_NAME=k8s-challenge
+doctl kubernetes cluster create $CLUSTER_NAME --version 1.21.5-do.0 --count 3 --size s-4vcpu-8gb --region fra1
 ```
 - Get the Kubernetes cluster name and kubeconf
 ```
 doctl kubernetes cluster list
-doctl kubernetes cluster kubeconfig show <CLUSTERNAME>
-doctl kubernetes cluster kubeconfig save <CLUSTERNAME>
+doctl kubernetes cluster kubeconfig show $CLUSTER_NAME
+doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
 ```
 - Check access to the Kubernetes cluster
 ```
@@ -36,8 +37,8 @@ doctl kubernetes cluster kubeconfig save <CLUSTERNAME>
 - Delete the Kubernetes cluster and kubeconf
 ```
 doctl kubernetes cluster list
-doctl kubernetes cluster kubeconfig rm <CLUSTERNAME>
-doctl kubernetes cluster rm <CLUSTERNAME>
+doctl kubernetes cluster kubeconfig rm $CLUSTER_NAME
+doctl kubernetes cluster rm $CLUSTER_NAME
 ```
 
 ## Install [vcluster](https://www.vcluster.com)
