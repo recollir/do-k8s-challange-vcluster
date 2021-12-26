@@ -8,10 +8,11 @@ From the [DigitalOcean Kubernetes Challenge](https://www.digitalocean.com/commun
 
 ## Preparations - Create a Kubernetes cluster using [DOKS (DigitalOcean managed Kubernetes Service)](https://www.digitalocean.com/products/kubernetes/)
 
-- Install doctl and kubectl
+- Install doctl and kubectl/helm
 ```
 brew install doctl
 brew install kubectl
+brew install helm
 ```
 - Create an API token (to be used in the next step)  
 Go to [DO API tokens](https://cloud.digitalocean.com/account/api/tokens)
@@ -44,5 +45,5 @@ doctl kubernetes cluster rm $CLUSTER_NAME
 ## Install [vcluster](https://www.vcluster.com)
 
 Based on the [_getting started_ full guide](https://www.vcluster.com/docs/getting-started/setup).  
-**Requirement:** access to running Kubernetes cluster
+**Requirement:** access to a running Kubernetes cluster
 - Install the vcluster cli
