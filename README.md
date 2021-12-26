@@ -10,36 +10,36 @@ From the [DigitalOcean Kubernetes Challenge](https://www.digitalocean.com/commun
 
 - Install doctl and kubectl/helm
 ```
-brew install doctl
-brew install kubectl
-brew install helm
+❯ brew install doctl
+❯ brew install kubectl
+❯ brew install helm
 ```
 - Create an API token (to be used in the next step)  
 Go to [DO API tokens](https://cloud.digitalocean.com/account/api/tokens)
 - Authenticate doctl
 ```
-doctl auth init
+❯ doctl auth init
 ```
 - Create Kubernetes cluster
 ```
-CLUSTER_NAME=k8s-challenge
-doctl kubernetes cluster create $CLUSTER_NAME --version 1.21.5-do.0 --count 3 --size s-4vcpu-8gb --region fra1
+❯ CLUSTER_NAME=k8s-challenge
+❯ doctl kubernetes cluster create $CLUSTER_NAME --version 1.21.5-do.0 --count 3 --size s-4vcpu-8gb --region fra1
 ```
 - Get the Kubernetes cluster name and kubeconf
 ```
-doctl kubernetes cluster list
-doctl kubernetes cluster kubeconfig show $CLUSTER_NAME
-doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
+❯ doctl kubernetes cluster list
+❯ doctl kubernetes cluster kubeconfig show $CLUSTER_NAME
+❯ doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
 ```
 - Check access to the Kubernetes cluster
 ```
-kubectl get nodes
+❯ kubectl get nodes
 ```
 - Delete the Kubernetes cluster and kubeconf
 ```
-doctl kubernetes cluster list
-doctl kubernetes cluster kubeconfig rm $CLUSTER_NAME
-doctl kubernetes cluster rm $CLUSTER_NAME
+❯ doctl kubernetes cluster list
+❯ doctl kubernetes cluster kubeconfig rm $CLUSTER_NAME
+❯ doctl kubernetes cluster rm $CLUSTER_NAME
 ```
 
 ## Install [vcluster](https://www.vcluster.com)
@@ -47,3 +47,102 @@ doctl kubernetes cluster rm $CLUSTER_NAME
 Based on the [_getting started_ full guide](https://www.vcluster.com/docs/getting-started/setup).  
 **Requirement:** access to a running Kubernetes cluster
 - Install the vcluster cli
+```
+❯ curl -s -L "https://github.com/loft-sh/vcluster/releases/latest" | sed -nE 's!.*"([^"]*vcluster-darwin-amd64)".*!https://github.com\1!p' | xargs -n 1 curl -L -o vcluster && chmod +x vcluster
+❯ sudo mv vcluster /usr/local/bin
+❯ vcluster --version
+```
+- Create a vcluster using the vcluster cli
+```
+❯ vcluster create vcluster-1 -n host-namespace-1
+```
+Output of command:
+```
+[info]   Creating namespace host-namespace-1
+[info]   execute command: helm upgrade vcluster-1 vcluster --repo https://charts.loft.sh --version 0.4.5 --kubeconfig /var/folders/nz/79xvvg853p7dxf4gkc8xstq40000gn/T/746245930 --namespace host-namespace-1 --install --repository-config='' --values /var/folders/nz/79xvvg853p7dxf4gkc8xstq40000gn/T/823828609
+[done] √ Successfully created virtual cluster vcluster-1 in namespace host-namespace-1. Use 'vcluster connect vcluster-1 --namespace host-namespace-1' to access the virtual cluster
+```
+- Objects created in the hosting cluster:
+```
+❯ kubectl get ns
+NAME               STATUS   AGE
+default            Active   13m
+host-namespace-1   Active   2m33s
+kube-node-lease    Active   13m
+kube-public        Active   13m
+kube-system        Active   13m
+
+❯ kubectl get all -n host-namespace-1
+NAME                                                      READY   STATUS    RESTARTS   AGE
+pod/coredns-7448499f4d-tc5ft-x-kube-system-x-vcluster-1   1/1     Running   0          2m18s
+pod/vcluster-1-0                                          2/2     Running   0          3m11s
+
+NAME                                          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+service/kube-dns-x-kube-system-x-vcluster-1   ClusterIP   10.245.124.148   <none>        53/UDP,53/TCP,9153/TCP   2m19s
+service/vcluster-1                            ClusterIP   10.245.37.208    <none>        443/TCP                  3m12s
+service/vcluster-1-headless                   ClusterIP   None             <none>        443/TCP                  3m12s
+service/vcluster-1-node-9q26b                 ClusterIP   10.245.198.74    <none>        10250/TCP                2m18s
+
+NAME                          READY   AGE
+statefulset.apps/vcluster-1   1/1     3m12s
+```
+- Connecting to the virtual cluster
+```
+❯ vcluster connect vcluster-1 --namespace host-namespace-1
+[done] √ Virtual cluster kube config written to: ./kubeconfig.yaml. You can access the cluster via `kubectl --kubeconfig ./kubeconfig.yaml get namespaces`
+[info]   Starting port-forwarding at 8443:8443
+Forwarding from 127.0.0.1:8443 -> 8443
+Forwarding from [::1]:8443 -> 8443
+```
+- Use the virtual cluster
+```
+❯ export KUBECONFIG=./kubeconfig.yaml
+
+❯ kubectl get ns
+NAME              STATUS   AGE
+default           Active   11m
+kube-system       Active   11m
+kube-public       Active   11m
+kube-node-lease   Active   11m
+
+❯ kubectl create deployment gasthear --image=recollir/gasthear:latest
+deployment.apps/gasthear created
+
+❯ kubectl get deployments
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+gasthear   1/1     1            1           6s
+
+❯ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+gasthear-f78cff969-bzdnn   0/1     ContainerCreating   0          8s
+```
+- Check the hosting cluster
+```
+❯ kubectl get all -n host-namespace-1
+NAME                                                      READY   STATUS    RESTARTS   AGE
+pod/coredns-7448499f4d-tc5ft-x-kube-system-x-vcluster-1   1/1     Running   0          18m
+pod/gasthear-f78cff969-bzdnn-x-default-x-vcluster-1       1/1     Running   0          80s
+pod/vcluster-1-0                                          2/2     Running   0          19m
+
+NAME                                          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+service/kube-dns-x-kube-system-x-vcluster-1   ClusterIP   10.245.124.148   <none>        53/UDP,53/TCP,9153/TCP   18m
+service/vcluster-1                            ClusterIP   10.245.37.208    <none>        443/TCP                  19m
+service/vcluster-1-headless                   ClusterIP   None             <none>        443/TCP                  19m
+service/vcluster-1-node-9q26b                 ClusterIP   10.245.198.74    <none>        10250/TCP                18m
+
+NAME                          READY   AGE
+statefulset.apps/vcluster-1   1/1     19m
+```
+- Delete the vcluster and any resources in it
+```
+❯ vcluster delete vcluster-1 -n host-namespace-1
+[info]   Delete helm chart with helm delete vcluster-1 --namespace host-namespace-1 --kubeconfig /var/folders/nz/79xvvg853p7dxf4gkc8xstq40000gn/T/110863067 --repository-config=''
+[done] √ Successfully deleted virtual cluster vcluster-1 in namespace host-namespace-1
+[done] √ Successfully deleted virtual cluster pvc data-vcluster-1-0 in namespace host-namespace-1
+
+❯ kubectl get all -n host-namespace-1
+No resources found in host-namespace-1 namespace.
+
+❯ kubectl delete ns host-namespace-1
+namespace "host-namespace-1" deleted
+```
