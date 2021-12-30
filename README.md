@@ -5,8 +5,63 @@ From the [DigitalOcean Kubernetes Challenge](https://www.digitalocean.com/commun
 
 > Install [vcluster](https://www.vcluster.com/) to test upgrades (eg. 1.20 to 1.21 DOKS version) of your cluster. With a virtual cluster, you can create a new Kubernetes cluster inside your existing DOKS cluster, test the application in this new vcluster, and then upgrade your original cluster if everything works well with the new version. Blogpost: [High-Velocity Engineering with Virtual Kubernetes Clusters](https://loft-sh.medium.com/high-velocity-engineering-with-virtual-kubernetes-clusters-7df929ac6d0a)
 
+---
 
-## Preparations - Create a Kubernetes cluster using [DOKS (DigitalOcean managed Kubernetes Service)](https://www.digitalocean.com/products/kubernetes/)
+## Approach to complete the challenge:
+
+- [create a DOKS Kubernetes cluster using doctl](#create-a-kubernetes-cluster-using-doks)
+- [install vcluster using the vcluster cli](#install-vcluster)
+- [Experiment with two vclusters running different versions than the host Kubernetes cluster](#experiment)
+
+---
+
+## Experiment
+
+After creating the host Kubernetes cluster and being able to create a basic vcluster.
+
+### Create two vclusters in the same host Kubernetes cluster running different versions  
+- hosting cluster : v1.21.5
+- vcluster 1: v1.22.5
+- vcluster 2: v1.23.1
+
+```
+❯ CLUSTER_NAME=k8s-challenge
+❯ doctl kubernetes cluster create $CLUSTER_NAME --version 1.21.5-do.0 --count 3 --size s-4vcpu-8gb --region fra1
+❯ vcluster create vcluster-1 -n host-namespace-1 --expose --k3s-image rancher/k3s:v1.22.5-k3s1
+❯ vcluster create vcluster-2 -n host-namespace-2 --expose --k3s-image rancher/k3s:v1.23.1-rc1-k3s1
+
+# Open two more terminals
+# terminal 0: hosting Kubernetes cluster
+# terminal 1: vcluster-1
+# terminal 2: vcluster-2
+
+(in terminal 1):
+❯ vcluster connect vcluster-1 --namespace host-namespace-1
+❯ mv kubeconfig.yaml vcluster-1.yaml
+
+(in terminal 2):
+❯ vcluster connect vcluster-2 --namespace host-namespace-2
+❯ mv kubeconfig.yaml vcluster-2.yaml
+```
+
+- Verify the versions of the three Kubernetes clusters
+```
+(in terminal 0):
+kubectl version --short
+
+(in terminal 1):
+❯ kubectl version --kubeconfig ./vcluster-1.yaml --short
+
+(in terminal 2):
+❯ kubectl version --kubeconfig ./vcluster-2.yaml --short
+```
+
+![Kubernetes versions](screenshot1.png)
+
+---
+
+## Create a Kubernetes cluster using DOKS
+[DOKS (DigitalOcean managed Kubernetes Service)](https://www.digitalocean.com/products/kubernetes/)
 
 - Install doctl and kubectl/helm
 ```
@@ -42,7 +97,10 @@ Go to [DO API tokens](https://cloud.digitalocean.com/account/api/tokens)
 ❯ doctl kubernetes cluster rm $CLUSTER_NAME
 ```
 
-## Install [vcluster](https://www.vcluster.com)
+---
+
+## Install vcluster
+[vcluster](https://www.vcluster.com)
 
 Based on the [_getting started_ full guide](https://www.vcluster.com/docs/getting-started/setup).  
 **Requirement:** access to a running Kubernetes cluster
