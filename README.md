@@ -44,7 +44,7 @@ After creating the host Kubernetes cluster and being able to create a basic vclu
 ❯ mv kubeconfig.yaml vcluster-2.yaml
 ```
 
-- Verify the versions of the three Kubernetes clusters
+### Verify the versions of the three Kubernetes clusters
 ```
 (in terminal 0):
 kubectl version --short
@@ -55,8 +55,34 @@ kubectl version --short
 (in terminal 2):
 ❯ kubectl version --kubeconfig ./vcluster-2.yaml --short
 ```
-
 ![Kubernetes versions](screenshot1.png)
+
+### Check the deployed objects on the host Kubernetes cluster
+```
+(in terminal 0):
+❯ kubectl get all -n host-namespace-1
+❯ kubectl get all -n host-namespace-2
+```
+![Objects](screenshot2.png)
+
+### Deploy a workload to both vclusters, expose and access them
+```
+(in terminal 1):
+❯ kubectl create deployment ernie --image=recollir/gasthear:latest --kubeconfig ./vcluster-1.yaml
+❯ kubectl expose deployment ernie --kubeconfig ./vcluster-1.yaml --port=80 --target-port=8080 --type=LoadBalancer
+❯ kubectl get service --kubeconfig ./vcluster-1.yaml
+❯ curl <external-ip>
+
+(in terminal 2):
+❯ kubectl create deployment bert --image=recollir/gasthear:latest --kubeconfig ./vcluster-2.yaml
+❯ kubectl expose deployment bert --kubeconfig ./vcluster-2.yaml --port=80 --target-port=8080 --type=LoadBalancer
+❯ kubectl get service --kubeconfig ./vcluster-2.yaml
+❯ curl <external-ip>
+```
+![Services](screenshot3.png)
+
+### Check deployments and pods
+![Deployments](screenshot4.png)
 
 ---
 
